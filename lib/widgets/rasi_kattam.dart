@@ -215,7 +215,7 @@ class _RasiCell extends StatelessWidget {
               Text(
                 rasiName,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: (cellSize * 0.16).clamp(9.0, 13.0),
                   color: rasiLabelColor,
                   fontWeight: FontWeight.w500,
                 ),
@@ -232,17 +232,17 @@ class _RasiCell extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             for (int i = 0; i < planets.length; i++) ...[
-                              if (i > 0) const SizedBox(height: 2),
+                              if (i > 0) const SizedBox(height: 1),
                               Text(
                                 planets[i].tamilName,
                                 style: TextStyle(
-                                  fontSize: 15,
+                                  fontSize: (cellSize * 0.19).clamp(10.0, 15.0),
                                   fontWeight: FontWeight.bold,
                                   color: nameColor,
                                   height: 1.1,
                                 ),
                                 maxLines: 1,
-                                overflow: TextOverflow.clip,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ],

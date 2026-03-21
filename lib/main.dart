@@ -38,6 +38,18 @@ class NimithamApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
+      builder: (context, child) {
+        // Clamp text scaling to prevent overflow on large accessibility settings
+        final mediaQuery = MediaQuery.of(context);
+        final scale = mediaQuery.textScaler.clamp(
+          minScaleFactor: 0.8,
+          maxScaleFactor: 1.1,
+        );
+        return MediaQuery(
+          data: mediaQuery.copyWith(textScaler: scale),
+          child: child!,
+        );
+      },
       home: const HomeScreen(),
     );
   }

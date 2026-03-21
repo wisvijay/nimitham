@@ -1,9 +1,10 @@
 import 'dart:math';
+import 'vsop87_constants.dart';
 
 class GrahaPosition {
   final String name;
   final String tamilName;
-  final String tamilShort; // short form for rasi kattam cells
+  final String tamilShort;
   final String symbol;
   final String rasiName;
   final String rasiTamil;
@@ -30,33 +31,6 @@ const List<String> _rasiTamil = [
   'துலாம்', 'விருச்சிகம்', 'தனுசு', 'மகரம்', 'கும்பம்', 'மீனம்',
 ];
 
-double _mod360(double x) => x - 360.0 * (x / 360.0).floor();
-
-// Lahiri Ayanamsa for Nirayana (Vedic sidereal) positions
-// ~24.13° for 2026 — subtract from tropical longitude
-double _ayanamsa(double t) => 23.85 + 0.0137 * (t * 100); // t in Julian centuries
-
-double _julianDay(DateTime utc) {
-  int y = utc.year;
-  int m = utc.month;
-  final int d = utc.day;
-  final double h = utc.hour + utc.minute / 60.0 + utc.second / 3600.0;
-  if (m <= 2) {
-    y--;
-    m += 12;
-  }
-  final int a = (y / 100).floor();
-  final int b = 2 - a + (a / 4).floor();
-  return (365.25 * (y + 4716)).floor() +
-      (30.6001 * (m + 1)).floor() +
-      d +
-      h / 24.0 +
-      b -
-      1524.5;
-}
-
-double _toRad(double deg) => deg * pi / 180.0;
-
 const Map<String, String> _shortNames = {
   'Sun':     'சூரி',
   'Moon':    'சந்',
@@ -69,9 +43,87 @@ const Map<String, String> _shortNames = {
   'Ketu':    'கேது',
 };
 
+double _mod360(double x) => ((x % 360) + 360) % 360;
+double _toRad(double deg) => deg * pi / 180.0;
+
+/// VSOP87 series sum: Σ A·cos(B + C·τ) where τ is in Julian millennia
+double _vsop(List<List<double>> terms, double tau) =>
+    terms.fold(0.0, (s, t) => s + t[0] * cos(t[1] + t[2] * tau));
+
+/// Heliocentric longitude (radians) from L0 + L1·τ VSOP87 series
+double _helioLon(List<List<double>> l0, List<List<double>> l1, double tau) {
+  final l = (_vsop(l0, tau) + _vsop(l1, tau) * tau) * 1e-8;
+  return ((l % (2 * pi)) + 2 * pi) % (2 * pi);
+}
+
+/// Heliocentric distance (AU) from R0 series
+double _helioR(List<List<double>> r0, double tau) => _vsop(r0, tau) * 1e-8;
+
+/// Geocentric ecliptic longitude (degrees) from heliocentric coords
+double _geoLon(double planetRad, double planetR, double earthRad, double earthR) {
+  final dx = planetR * cos(planetRad) - earthR * cos(earthRad);
+  final dy = planetR * sin(planetRad) - earthR * sin(earthRad);
+  return _mod360(atan2(dy, dx) * 180 / pi);
+}
+
+/// Julian Day Number from UTC DateTime
+double _julianDay(DateTime utc) {
+  int y = utc.year, m = utc.month, d = utc.day;
+  double h = utc.hour + utc.minute / 60.0 + utc.second / 3600.0;
+  if (m <= 2) { y--; m += 12; }
+  final a = (y / 100).floor();
+  final b = 2 - a + (a / 4).floor();
+  return (365.25 * (y + 4716)).floor() +
+      (30.6001 * (m + 1)).floor() +
+      d + h / 24.0 + b - 1524.5;
+}
+
+/// Lahiri Ayanamsa (degrees) for given Julian centuries T
+double _ayanamsa(double tCenturies) =>
+    kAyanamsaBase + kAyanamsaRate * (tCenturies * 100);
+
+/// Sun apparent longitude (tropical, degrees)
+double _sunLon(double tCenturies) {
+  final l0 = _mod360(kSunL0Base + kSunL0Rate * tCenturies);
+  final m  = _mod360(kSunMBase  + kSunMRate  * tCenturies
+      + kSunMRate2 * tCenturies * tCenturies);
+  final mr = _toRad(m);
+  final c = (kSunCCoeffs[0] + kSunCCoeffs[1] * tCenturies
+      + kSunCCoeffs[2] * tCenturies * tCenturies) * sin(mr)
+      + (kSunC2Coeffs[0] + kSunC2Coeffs[1] * tCenturies) * sin(2 * mr)
+      + kSunC3 * sin(3 * mr);
+  return _mod360(l0 + c);
+}
+
+/// Moon longitude (tropical, degrees) using ELP2000 truncated (Meeus Ch.47)
+/// Note: Moon uses Julian centuries T, not millennia τ
+double _moonLon(double tCenturies) {
+  final lp = _mod360(kMoonLpBase + kMoonLpRate * tCenturies);
+  final dm = _mod360(kMoonDBase  + kMoonDRate  * tCenturies);
+  final ms = _mod360(kMoonMBase  + kMoonMRate  * tCenturies);
+  final mp = _mod360(kMoonMpBase + kMoonMpRate * tCenturies);
+  final f  = _mod360(kMoonFBase  + kMoonFRate  * tCenturies);
+
+  double sigma = 0;
+  for (final term in kMoonLTerms) {
+    final arg = _toRad(term[1]*dm + term[2]*ms + term[3]*mp + term[4]*f);
+    sigma += term[0] * sin(arg);
+  }
+  return _mod360(lp + sigma);
+}
+
+/// Rahu (Mean Ascending Node, degrees, tropical)
+/// Note: Rahu uses Julian centuries T
+double _rahuLon(double tCenturies) =>
+    _mod360(kRahuBase + kRahuRate * tCenturies
+        + kRahuRate2 * tCenturies * tCenturies
+        - kRahuRate3 * tCenturies * tCenturies * tCenturies);
+
 GrahaPosition _makePosition(
-    String name, String tamilName, String symbol, double longitude) {
-  final int rasiIdx = (longitude / 30).floor() % 12;
+    String name, String tamilName, String symbol,
+    double tropicalLon, double aya) {
+  final nirayana = _mod360(tropicalLon - aya);
+  final rasiIdx = (nirayana / 30).floor() % 12;
   return GrahaPosition(
     name: name,
     tamilName: tamilName,
@@ -86,54 +138,42 @@ GrahaPosition _makePosition(
 List<GrahaPosition> getNavagrahaPositions(DateTime now) {
   final utc = now.toUtc();
   final jd = _julianDay(utc);
-  final t = (jd - 2451545.0) / 36525.0;
-  final d = jd - 2451545.0;
+  final tCenturies = (jd - 2451545.0) / 36525.0;
+  final tau = tCenturies / 10.0; // Julian millennia — required for VSOP87
+  final aya = _ayanamsa(tCenturies);
 
-  // Lahiri Ayanamsa correction for Nirayana (Vedic sidereal)
-  final aya = _ayanamsa(t);
+  // Earth heliocentric position (needed for geocentric conversion)
+  final earthRad = _helioLon(kEarthL0, kEarthL1, tau);
+  final earthR   = _helioR(kEarthR0, tau);
 
-  // Sun
-  final l0 = _mod360(280.46646 + 36000.76983 * t);
-  final mSun = _mod360(357.52911 + 35999.05029 * t);
-  final mSunRad = _toRad(mSun);
-  final c = (1.914602 - 0.004817 * t - 0.000014 * t * t) * sin(mSunRad) +
-      (0.019993 - 0.000101 * t) * sin(2 * mSunRad) +
-      0.000289 * sin(3 * mSunRad);
-  final sunLon = _mod360(l0 + c - aya);
+  // Outer planets: geocentric via heliocentric - Earth vector
+  double outerGeo(List<List<double>> pL0, List<List<double>> pL1,
+      List<List<double>> pR0) {
+    final pRad = _helioLon(pL0, pL1, tau);
+    final pR   = _helioR(pR0, tau);
+    return _geoLon(pRad, pR, earthRad, earthR);
+  }
 
-  // Moon (simplified mean longitude)
-  final moonLon = _mod360(218.3165 + 13.176396 * d - aya);
+  final marsLon    = outerGeo(kMarsL0,    kMarsL1,    kMarsR0);
+  final jupiterLon = outerGeo(kJupiterL0, kJupiterL1, kJupiterR0);
+  final saturnLon  = outerGeo(kSaturnL0,  kSaturnL1,  kSaturnR0);
+  final venusLon   = outerGeo(kVenusL0,   kVenusL1,   kVenusR0);
+  final mercuryLon = outerGeo(kMercuryL0, kMercuryL1, kMercuryR0);
 
-  // Mars
-  final marsLon = _mod360(355.433 + 0.524033 * d - aya);
-
-  // Mercury
-  final mercuryLon = _mod360(252.251 + 4.092335 * d - aya);
-
-  // Jupiter
-  final jupiterLon = _mod360(34.351 + 0.083056 * d - aya);
-
-  // Venus
-  final venusLon = _mod360(181.979 + 1.602136 * d - aya);
-
-  // Saturn
-  final saturnLon = _mod360(50.077 + 0.033459 * d - aya);
-
-  // Rahu (Mean North Node — retrograde)
-  final rahuLon = _mod360(125.0445 - 0.052954 * d - aya);
-
-  // Ketu = Rahu + 180
+  final sunLon  = _sunLon(tCenturies);
+  final moonLon = _moonLon(tCenturies);
+  final rahuLon = _rahuLon(tCenturies);
   final ketuLon = _mod360(rahuLon + 180.0);
 
   return [
-    _makePosition('Sun', 'சூரியன்', '☉', sunLon),
-    _makePosition('Moon', 'சந்திரன்', '☽', moonLon),
-    _makePosition('Mars', 'செவ்வாய்', '♂', marsLon),
-    _makePosition('Mercury', 'புதன்', '☿', mercuryLon),
-    _makePosition('Jupiter', 'குரு', '♃', jupiterLon),
-    _makePosition('Venus', 'சுக்கிரன்', '♀', venusLon),
-    _makePosition('Saturn', 'சனி', '♄', saturnLon),
-    _makePosition('Rahu', 'ராகு', '☊', rahuLon),
-    _makePosition('Ketu', 'கேது', '☋', ketuLon),
+    _makePosition('Sun',     'சூரியன்',   '☉', sunLon,     aya),
+    _makePosition('Moon',    'சந்திரன்',  '☽', moonLon,    aya),
+    _makePosition('Mars',    'செவ்வாய்',  '♂', marsLon,    aya),
+    _makePosition('Mercury', 'புதன்',     '☿', mercuryLon, aya),
+    _makePosition('Jupiter', 'குரு',      '♃', jupiterLon, aya),
+    _makePosition('Venus',   'சுக்கிரன்', '♀', venusLon,   aya),
+    _makePosition('Saturn',  'சனி',       '♄', saturnLon,  aya),
+    _makePosition('Rahu',    'ராகு',      '☊', rahuLon,    aya),
+    _makePosition('Ketu',    'கேது',      '☋', ketuLon,    aya),
   ];
 }

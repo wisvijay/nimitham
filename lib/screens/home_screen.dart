@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import '../logic/hora.dart';
 import '../logic/gowri.dart';
@@ -102,6 +103,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     // App title
                     Row(
                       children: [
+                        SvgPicture.asset(
+                          'assets/icon/nimitham_logo.svg',
+                          width: 44,
+                          height: 44,
+                        ),
+                        const SizedBox(width: 10),
                         Text(
                           'நிமித்தம்',
                           style: theme.textTheme.headlineSmall?.copyWith(

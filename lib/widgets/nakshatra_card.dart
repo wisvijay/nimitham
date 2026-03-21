@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
 import '../logic/nakshatra.dart';
 
+const List<String> _rasiTamil = [
+  'மேஷம்', 'ரிஷபம்', 'மிதுனம்', 'கடகம்', 'சிம்மம்', 'கன்னி',
+  'துலாம்', 'விருச்சிகம்', 'தனுசு', 'மகரம்', 'கும்பம்', 'மீனம்',
+];
+
+String _moonRasi(double moonLon) {
+  final idx = (moonLon / 30).floor() % 12;
+  final deg = moonLon % 30;
+  return '${_rasiTamil[idx]} ${deg.toStringAsFixed(1)}°';
+}
+
 class NakshatraCard extends StatelessWidget {
   final NakshatraResult nakshatra;
 
@@ -76,14 +87,14 @@ class NakshatraCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Moon longitude info
+            // Rasi + Moon longitude
             Row(
               children: [
                 Icon(Icons.nightlight_round, size: 16,
                     color: accentColor.withValues(alpha: 0.7)),
                 const SizedBox(width: 6),
                 Text(
-                  'சந்திரன்: ${nakshatra.moonLon.toStringAsFixed(2)}°',
+                  'சந்திரன் ராசி: ${_moonRasi(nakshatra.moonLon)}',
                   style: TextStyle(
                     fontSize: 16,
                     color: isDark ? Colors.white60 : Colors.black54,

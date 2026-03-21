@@ -32,6 +32,10 @@ const List<String> _rasiTamil = [
 
 double _mod360(double x) => x - 360.0 * (x / 360.0).floor();
 
+// Lahiri Ayanamsa for Nirayana (Vedic sidereal) positions
+// ~24.13° for 2026 — subtract from tropical longitude
+double _ayanamsa(double t) => 23.85 + 0.0137 * (t * 100); // t in Julian centuries
+
 double _julianDay(DateTime utc) {
   int y = utc.year;
   int m = utc.month;
@@ -85,6 +89,9 @@ List<GrahaPosition> getNavagrahaPositions(DateTime now) {
   final t = (jd - 2451545.0) / 36525.0;
   final d = jd - 2451545.0;
 
+  // Lahiri Ayanamsa correction for Nirayana (Vedic sidereal)
+  final aya = _ayanamsa(t);
+
   // Sun
   final l0 = _mod360(280.46646 + 36000.76983 * t);
   final mSun = _mod360(357.52911 + 35999.05029 * t);
@@ -92,28 +99,28 @@ List<GrahaPosition> getNavagrahaPositions(DateTime now) {
   final c = (1.914602 - 0.004817 * t - 0.000014 * t * t) * sin(mSunRad) +
       (0.019993 - 0.000101 * t) * sin(2 * mSunRad) +
       0.000289 * sin(3 * mSunRad);
-  final sunLon = _mod360(l0 + c);
+  final sunLon = _mod360(l0 + c - aya);
 
   // Moon (simplified mean longitude)
-  final moonLon = _mod360(218.3165 + 13.176396 * d);
+  final moonLon = _mod360(218.3165 + 13.176396 * d - aya);
 
   // Mars
-  final marsLon = _mod360(355.433 + 0.524033 * d);
+  final marsLon = _mod360(355.433 + 0.524033 * d - aya);
 
   // Mercury
-  final mercuryLon = _mod360(252.251 + 4.092335 * d);
+  final mercuryLon = _mod360(252.251 + 4.092335 * d - aya);
 
   // Jupiter
-  final jupiterLon = _mod360(34.351 + 0.083056 * d);
+  final jupiterLon = _mod360(34.351 + 0.083056 * d - aya);
 
   // Venus
-  final venusLon = _mod360(181.979 + 1.602136 * d);
+  final venusLon = _mod360(181.979 + 1.602136 * d - aya);
 
   // Saturn
-  final saturnLon = _mod360(50.077 + 0.033459 * d);
+  final saturnLon = _mod360(50.077 + 0.033459 * d - aya);
 
   // Rahu (Mean North Node — retrograde)
-  final rahuLon = _mod360(125.0445 - 0.052954 * d);
+  final rahuLon = _mod360(125.0445 - 0.052954 * d - aya);
 
   // Ketu = Rahu + 180
   final ketuLon = _mod360(rahuLon + 180.0);

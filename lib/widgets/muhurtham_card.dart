@@ -31,7 +31,7 @@ class MuhurthamCard extends StatelessWidget {
                 Icon(Icons.warning_amber_rounded, color: accentColor, size: 22),
                 const SizedBox(width: 8),
                 Text(
-                  'தீய நேரங்கள்',
+                  'காலங்கள்',
                   style: TextStyle(
                     color: titleColor,
                     fontWeight: FontWeight.bold,

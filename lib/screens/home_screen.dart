@@ -6,9 +6,11 @@ import '../logic/hora.dart';
 import '../logic/gowri.dart';
 import '../logic/navagraha.dart';
 import '../logic/lagnam.dart';
+import '../logic/nakshatra.dart';
 import '../widgets/hora_card.dart';
 import '../widgets/gowri_card.dart';
 import '../widgets/lagnam_card.dart';
+import '../widgets/nakshatra_card.dart';
 import '../widgets/rasi_kattam.dart';
 
 const Map<int, String> _weekdayTamil = {
@@ -88,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // IST time
     final ist = _now.toUtc().add(const Duration(hours: 5, minutes: 30));
     final hora = getCurrentHora(_now);
+    final nakshatra = getNakshatra(_now);
     final grahaPositions = getNavagrahaPositions(_generatedAt);
 
     final tamilDay = _weekdayTamil[ist.weekday] ?? '';
@@ -210,6 +213,17 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: isDark ? Colors.white60 : Colors.black54,
                             ),
                           ),
+                          if (_lagnam != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              '${_lagnam!.tamilDate.monthName} ${_lagnam!.tamilDate.date}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: isDark ? const Color(0xFFFFD580) : const Color(0xFF7A4500),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -232,6 +246,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     LagnamCard(lagnam: _lagnam!),
                     const SizedBox(height: 16),
                   ],
+                  NakshatraCard(nakshatra: nakshatra),
+                  const SizedBox(height: 16),
                   RasiKattam(
                     positions: grahaPositions,
                     now: _generatedAt,

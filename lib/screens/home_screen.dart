@@ -33,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late DateTime _generatedAt;
   Timer? _timer;
   LagnamResult? _lagnam;
+  GowriResult? _gowri;
   bool _loading = true;
 
   @override
@@ -40,28 +41,37 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _now = DateTime.now();
     _generatedAt = _now;
-    _loadLagnam(_now);
+    _loadAll(_now);
     // Align timer to the next minute boundary for smooth updates
     final secondsToNextMinute = 60 - _now.second;
     Future.delayed(Duration(seconds: secondsToNextMinute), () {
       if (mounted) {
         final now = DateTime.now();
         setState(() => _now = now);
-        _loadLagnam(now);
+        _loadAll(now);
         _timer = Timer.periodic(const Duration(minutes: 1), (_) {
           if (mounted) {
             final t = DateTime.now();
             setState(() => _now = t);
-            _loadLagnam(t);
+            _loadAll(t);
           }
         });
       }
     });
   }
 
-  Future<void> _loadLagnam(DateTime now) async {
-    final result = await getCurrentLagnam(now);
-    if (mounted) setState(() { _lagnam = result; _loading = false; });
+  Future<void> _loadAll(DateTime now) async {
+    final results = await Future.wait([
+      getCurrentLagnam(now),
+      getCurrentGowri(now),
+    ]);
+    if (mounted) {
+      setState(() {
+        _lagnam = results[0] as LagnamResult;
+        _gowri = results[1] as GowriResult;
+        _loading = false;
+      });
+    }
   }
 
   @override
@@ -78,7 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
     // IST time
     final ist = _now.toUtc().add(const Duration(hours: 5, minutes: 30));
     final hora = getCurrentHora(_now);
-    final gowri = getCurrentGowri(_now);
     final grahaPositions = getNavagrahaPositions(_generatedAt);
 
     final tamilDay = _weekdayTamil[ist.weekday] ?? '';
@@ -217,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 delegate: SliverChildListDelegate([
                   HoraCard(hora: hora),
                   const SizedBox(height: 16),
-                  GowriCard(gowri: gowri),
+                  if (_gowri != null) GowriCard(gowri: _gowri!),
                   const SizedBox(height: 16),
                   if (_lagnam != null) ...[
                     LagnamCard(lagnam: _lagnam!),

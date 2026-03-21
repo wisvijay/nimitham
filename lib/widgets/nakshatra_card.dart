@@ -6,10 +6,9 @@ const List<String> _rasiTamil = [
   'துலாம்', 'விருச்சிகம்', 'தனுசு', 'மகரம்', 'கும்பம்', 'மீனம்',
 ];
 
-String _moonRasi(double moonLon) {
+String _moonRasiOnly(double moonLon) {
   final idx = (moonLon / 30).floor() % 12;
-  final deg = moonLon % 30;
-  return '${_rasiTamil[idx]} ${deg.toStringAsFixed(1)}°';
+  return _rasiTamil[idx];
 }
 
 class NakshatraCard extends StatelessWidget {
@@ -85,22 +84,16 @@ class NakshatraCard extends StatelessWidget {
                 height: 1.1,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
 
-            // Rasi + Moon longitude
-            Row(
-              children: [
-                Icon(Icons.nightlight_round, size: 16,
-                    color: accentColor.withValues(alpha: 0.7)),
-                const SizedBox(width: 6),
-                Text(
-                  'சந்திரன் ராசி: ${_moonRasi(nakshatra.moonLon)}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: isDark ? Colors.white60 : Colors.black54,
-                  ),
-                ),
-              ],
+            // Rasi below nakshatra
+            Text(
+              _moonRasiOnly(nakshatra.moonLon),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: isDark ? const Color(0xFF81C784) : const Color(0xFF2E7D32),
+              ),
             ),
           ],
         ),

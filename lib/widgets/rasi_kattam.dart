@@ -28,6 +28,7 @@ class RasiKattam extends StatelessWidget {
   final DateTime now;
   final DateTime generatedAt;
   final VoidCallback onRefresh;
+  final int? lagnaRasiIndex; // 0-based rasi index for current lagna (optional)
 
   const RasiKattam({
     super.key,
@@ -35,6 +36,7 @@ class RasiKattam extends StatelessWidget {
     required this.now,
     required this.generatedAt,
     required this.onRefresh,
+    this.lagnaRasiIndex,
   });
 
   @override
@@ -102,12 +104,14 @@ class RasiKattam extends StatelessWidget {
 
                 final planets = rasiIdx != null ? (byRasi[rasiIdx] ?? []) : <GrahaPosition>[];
                 final rasiName = rasiIdx != null ? _rasiTamil[rasiIdx] : '';
+                final isLagna = rasiIdx != null && rasiIdx == lagnaRasiIndex;
 
                 return _RasiCell(
                   rasiName: rasiName,
                   planets: planets,
                   isDark: isDark,
                   cellSize: cellSize,
+                  isLagna: isLagna,
                 );
               });
             });
@@ -183,18 +187,24 @@ class _RasiCell extends StatelessWidget {
   final List<GrahaPosition> planets;
   final bool isDark;
   final double cellSize;
+  final bool isLagna;
 
   const _RasiCell({
     required this.rasiName,
     required this.planets,
     required this.isDark,
     required this.cellSize,
+    this.isLagna = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = isDark ? const Color(0xFF2A1A00) : const Color(0xFFFFF8E7);
-    final borderColor = const Color(0xFFD4860A).withValues(alpha: 0.5);
+    final cardColor = isLagna
+        ? (isDark ? const Color(0xFF1A2A00) : const Color(0xFFE8FFD0))
+        : (isDark ? const Color(0xFF2A1A00) : const Color(0xFFFFF8E7));
+    final borderColor = isLagna
+        ? const Color(0xFF4CAF50).withValues(alpha: 0.8)
+        : const Color(0xFFD4860A).withValues(alpha: 0.5);
     final rasiLabelColor = isDark ? Colors.white38 : Colors.black38;
     final nameColor = isDark ? Colors.white70 : const Color(0xFF1A0A00);
 
@@ -222,6 +232,17 @@ class _RasiCell extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.clip,
               ),
+              // ல marker for current lagna
+              if (isLagna)
+                Text(
+                  'ல',
+                  style: TextStyle(
+                    fontSize: (cellSize * 0.20).clamp(11.0, 16.0),
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF2E7D32),
+                    height: 1.0,
+                  ),
+                ),
               // Planets
               Expanded(
                 child: planets.isEmpty

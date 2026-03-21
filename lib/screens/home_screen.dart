@@ -62,6 +62,16 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  static const List<String> _lagnaRasiNames = [
+    'மேஷம்', 'ரிஷபம்', 'மிதுனம்', 'கடகம்', 'சிம்மம்', 'கன்னி',
+    'துலாம்', 'விருச்சிகம்', 'தனுசு', 'மகரம்', 'கும்பம்', 'மீனம்',
+  ];
+
+  int? _getLagnaRasiIndex() {
+    if (_lagnam == null) return null;
+    return _lagnaRasiNames.indexOf(_lagnam!.lagnaName);
+  }
+
   Future<void> _loadAll(DateTime now) async {
     final results = await Future.wait([
       getCurrentLagnam(now),
@@ -253,6 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     now: _generatedAt,
                     generatedAt: _generatedAt,
                     onRefresh: () => setState(() => _generatedAt = DateTime.now()),
+                    lagnaRasiIndex: _getLagnaRasiIndex(),
                   ),
                   const SizedBox(height: 32),
 

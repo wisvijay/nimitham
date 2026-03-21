@@ -234,7 +234,7 @@ class _RasiCell extends StatelessWidget {
                             for (int i = 0; i < planets.length; i++) ...[
                               if (i > 0) const SizedBox(height: 1),
                               Text(
-                                planets[i].tamilName,
+                                planets[i].tamilShort,
                                 style: TextStyle(
                                   fontSize: (cellSize * 0.19).clamp(10.0, 15.0),
                                   fontWeight: FontWeight.bold,

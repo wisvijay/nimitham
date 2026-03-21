@@ -33,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late DateTime _generatedAt;
   Timer? _timer;
   LagnamResult? _lagnam;
+  bool _loading = true;
 
   @override
   void initState() {
@@ -60,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadLagnam(DateTime now) async {
     final result = await getCurrentLagnam(now);
-    if (mounted) setState(() => _lagnam = result);
+    if (mounted) setState(() { _lagnam = result; _loading = false; });
   }
 
   @override
@@ -88,6 +89,35 @@ class _HomeScreenState extends State<HomeScreen> {
         ? const Color(0xFF0D0700)
         : const Color(0xFFFDF6E3);
     final headerColor = isDark ? const Color(0xFFFFD580) : const Color(0xFF7A4500);
+
+    // Splash screen while loading
+    if (_loading) {
+      return Scaffold(
+        backgroundColor: bgColor,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset('assets/icon/nimitham_logo.svg', width: 180, height: 180),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  color: headerColor,
+                  strokeWidth: 3,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'தயாராகிறது...',
+                style: TextStyle(fontSize: 18, color: headerColor),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: bgColor,

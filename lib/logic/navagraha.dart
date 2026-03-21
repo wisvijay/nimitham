@@ -3,6 +3,7 @@ import 'dart:math';
 class GrahaPosition {
   final String name;
   final String tamilName;
+  final String tamilShort; // short form for rasi kattam cells
   final String symbol;
   final String rasiName;
   final String rasiTamil;
@@ -11,6 +12,7 @@ class GrahaPosition {
   const GrahaPosition({
     required this.name,
     required this.tamilName,
+    required this.tamilShort,
     required this.symbol,
     required this.rasiName,
     required this.rasiTamil,
@@ -51,12 +53,25 @@ double _julianDay(DateTime utc) {
 
 double _toRad(double deg) => deg * pi / 180.0;
 
+const Map<String, String> _shortNames = {
+  'Sun':     'சூரி',
+  'Moon':    'சந்',
+  'Mars':    'செவ்',
+  'Mercury': 'புத',
+  'Jupiter': 'குரு',
+  'Venus':   'சுக்',
+  'Saturn':  'சனி',
+  'Rahu':    'ராகு',
+  'Ketu':    'கேது',
+};
+
 GrahaPosition _makePosition(
     String name, String tamilName, String symbol, double longitude) {
   final int rasiIdx = (longitude / 30).floor() % 12;
   return GrahaPosition(
     name: name,
     tamilName: tamilName,
+    tamilShort: _shortNames[name] ?? tamilName,
     symbol: symbol,
     rasiName: _rasiNames[rasiIdx],
     rasiTamil: _rasiTamil[rasiIdx],

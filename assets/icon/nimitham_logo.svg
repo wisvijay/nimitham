@@ -39,34 +39,34 @@
   <circle cx="256" cy="256" r="148" fill="url(#bgGrad)" stroke="#D4860A" stroke-width="2" opacity="0.95"/>
 
   <!-- SRM text -->
-  <text x="256" y="205"
+  <text x="256" y="200"
     font-family="Georgia, serif"
-    font-size="52"
+    font-size="68"
     font-weight="bold"
     fill="#D4860A"
     text-anchor="middle"
-    letter-spacing="8"
+    letter-spacing="10"
     opacity="0.9">SRM</text>
 
   <!-- Divider line -->
-  <line x1="160" y1="222" x2="352" y2="222" stroke="#D4860A" stroke-width="1.5" opacity="0.5"/>
+  <line x1="140" y1="220" x2="372" y2="220" stroke="#D4860A" stroke-width="1.5" opacity="0.5"/>
 
   <!-- நிமித்தம் Tamil text -->
-  <text x="256" y="285"
+  <text x="256" y="292"
     font-family="serif"
-    font-size="58"
+    font-size="72"
     font-weight="bold"
     fill="#FFD54F"
     text-anchor="middle"
     >நிமித்தம்</text>
 
   <!-- Subtitle -->
-  <text x="256" y="318"
+  <text x="256" y="328"
     font-family="Georgia, serif"
-    font-size="22"
+    font-size="26"
     fill="#D4860A"
     text-anchor="middle"
-    letter-spacing="3"
+    letter-spacing="4"
     opacity="0.8">NIMITHAM</text>
 
   <!-- Small decorative dots at compass points -->

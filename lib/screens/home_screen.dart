@@ -8,11 +8,13 @@ import '../logic/navagraha.dart';
 import '../logic/lagnam.dart';
 import '../logic/nakshatra.dart';
 import '../logic/muhurtham.dart';
+import '../logic/panchang.dart';
 import '../widgets/hora_card.dart';
 import '../widgets/gowri_card.dart';
 import '../widgets/lagnam_card.dart';
 import '../widgets/nakshatra_card.dart';
 import '../widgets/muhurtham_card.dart';
+import '../widgets/panchang_card.dart';
 import '../widgets/rasi_kattam.dart';
 
 const Map<int, String> _weekdayTamil = {
@@ -104,6 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final hora = getCurrentHora(_now);
     final nakshatra = getNakshatra(_now);
     final muhurtham = getMuhurthamTimings(_now);
+    final thidhi = getThidhi(_now);
+    final karanam = getKaranam(_now);
     final grahaPositions = getNavagrahaPositions(_generatedAt);
 
     final tamilDay = _weekdayTamil[ist.weekday] ?? '';
@@ -262,6 +266,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 16),
                   ],
                   NakshatraCard(nakshatra: nakshatra),
+                  const SizedBox(height: 16),
+                  PanchangCard(thidhi: thidhi, karanam: karanam),
                   const SizedBox(height: 16),
                   RasiKattam(
                     positions: grahaPositions,

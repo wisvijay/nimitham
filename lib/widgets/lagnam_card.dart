@@ -36,15 +36,18 @@ class LagnamCard extends StatelessWidget {
               children: [
                 Icon(Icons.auto_awesome, color: accentColor, size: 22),
                 const SizedBox(width: 8),
-                Text(
-                  'லக்னம்',
-                  style: TextStyle(
-                    color: titleColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
+                Flexible(
+                  child: Text(
+                    'லக்னம்',
+                    style: TextStyle(
+                      color: titleColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
@@ -86,20 +89,22 @@ class LagnamCard extends StatelessWidget {
               children: [
                 Icon(Icons.access_time, size: 16, color: accentColor.withValues(alpha: 0.7)),
                 const SizedBox(width: 6),
-                Builder(builder: (context) {
-                  final now = DateTime.now().toUtc().add(const Duration(hours: 5, minutes: 30));
-                  final endIst = lagnam.endTime;
-                  final isNextDay = endIst.day != now.day || endIst.isBefore(now);
-                  final prefix = isNextDay ? 'நாளை ' : '';
-                  return Text(
-                    'முடிவு நேரம்: $prefix${timeFormat.format(lagnam.endTime)}',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: isDark ? Colors.white60 : Colors.black54,
-                      letterSpacing: 0.3,
-                    ),
-                  );
-                }),
+                Flexible(
+                  child: Builder(builder: (context) {
+                    final now = DateTime.now().toUtc().add(const Duration(hours: 5, minutes: 30));
+                    final endIst = lagnam.endTime;
+                    final isNextDay = endIst.day != now.day || endIst.isBefore(now);
+                    final prefix = isNextDay ? 'நாளை ' : '';
+                    return Text(
+                      'முடிவு நேரம்: $prefix${timeFormat.format(lagnam.endTime)}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isDark ? Colors.white60 : Colors.black54,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    );
+                  }),
+                ),
               ],
             ),
           ],

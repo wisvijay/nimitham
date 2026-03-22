@@ -38,15 +38,18 @@ class HoraCard extends StatelessWidget {
               children: [
                 Icon(Icons.wb_sunny_outlined, color: accentColor, size: 22),
                 const SizedBox(width: 8),
-                Text(
-                  'கிரக ஓரை',
-                  style: TextStyle(
-                    color: titleColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
+                Flexible(
+                  child: Text(
+                    'கிரக ஓரை',
+                    style: TextStyle(
+                      color: titleColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(

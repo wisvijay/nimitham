@@ -30,12 +30,15 @@ class MuhurthamCard extends StatelessWidget {
               children: [
                 Icon(Icons.warning_amber_rounded, color: accentColor, size: 22),
                 const SizedBox(width: 8),
-                Text(
-                  'காலங்கள்',
-                  style: TextStyle(
-                    color: titleColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
+                Flexible(
+                  child: Text(
+                    'காலங்கள்',
+                    style: TextStyle(
+                      color: titleColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
